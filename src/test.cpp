@@ -15,5 +15,5 @@ TEST_CASE(test_b) {
 
 int main() {
     // run a bunch of tests defined above
-
 }
+/// TODO: please write unit tests for integrity with hashes
