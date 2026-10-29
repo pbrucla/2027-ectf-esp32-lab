@@ -1,5 +1,5 @@
-#include "test.h"
-#include "uart.h"
+#include "test.hpp"
+#include "uart.hpp"
 
 static const int a = 1, b = 2;
 

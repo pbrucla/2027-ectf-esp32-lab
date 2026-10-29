@@ -43,7 +43,7 @@ The ESP32 has three hardware UARTs:
 1. In the Arduino IDE, open **Boards Manager** and install **esp32 by Espressif
    Systems**.
 2. Select **Tools → Board → esp32 → ESP32-WROOM-DA Module**.
-3. Open [uart/uart.ino](uart/uart.ino).
+3. Open [src/uart.ino](src/uart.ino).
 4. Plug in one board, select its port under **Tools → Port**, and click
    **Upload** to check that everything works. The starter code compiles; it
    just doesn't do anything useful yet.

@@ -2,7 +2,7 @@
 
 ## Part 1: Implement UART
 
-Open [uart/uart.ino](uart/uart.ino) and read the whole file first.
+Open [src/uart.ino](src/uart.ino) and read the whole file first.
 The `readLine()` helper is given to you. Make sure you understand how it builds
 up a line one character at a time and why it **never waits** for data.
 
@@ -106,3 +106,6 @@ Useful functions: `line.indexOf(':')`, `line.substring(start, end)`,
 | `Sent:` appears but nothing is received | TX/RX not crossed, wrong pins, loose wire, or the other board isn't running the sketch. |
 | Upload fails with "Failed to connect" | Hold the **BOOT** button while the upload starts. |
 | Board reboots or crashes on start | Some modules (e.g. ESP32-WROVER) use GPIO16/17 internally. Change the pins to 25 and 26. |
+
+## Pinout Reference
+![image](pinout_reference.png) for wiring
