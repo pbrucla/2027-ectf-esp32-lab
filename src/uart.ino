@@ -1,5 +1,7 @@
 #include "uart.h"
 
+/// TODO: refactor this, tho consider that ppl prob have committed?
+
 // UART lab reference solution: two-way text messages between two ESP32s over UART.
 //
 // Flash this same sketch to both boards. Wiring (cross TX/RX, share ground):

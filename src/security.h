@@ -5,3 +5,4 @@
 
 
 bool check_hash();
+// just do what we were doing in python lab
