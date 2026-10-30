@@ -9,13 +9,13 @@ Like seen before in the [Python Crypto lab](https://github.com/pbrucla/2027-ectf
 
 ## The code
 
-Here we're focusing on `add_integrity_hash()` and `verify_integrity_hash()` in [security.cpp](../src/security.cpp). Implement these functions and also implement `encode()` and `decode()` in [commands.cpp](../src/commands.cpp).
+Here we're focusing on `hash_message()`, `add_integrity_hash()` and `verify_integrity_hash()` in [security.cpp](../src/security.cpp). Implement these functions and also implement `encode()` and `decode()` in [commands.cpp](../src/commands.cpp).
 
 | File | What it holds |
 | --- | --- |
 | [src/commands.hpp](../src/commands.hpp) | The `cmd_msg_t` command struct, its wire format, `encode()` and `decode()` |
 | [src/crypto.hpp](../src/crypto.hpp) | `sha256()` (given, in `crypto.cpp`) |
-| [src/security.hpp](../src/security.hpp) | `add_integrity_hash()` and `verify_integrity_hash()` |
+| [src/security.hpp](../src/security.hpp) | `hash_message()`, `add_integrity_hash()` and `verify_integrity_hash()` |
 | [test/test.cpp](../test/test.cpp) | Unit tests |
 
 Read the headers first. Each function you write has a `TODO`.
@@ -93,12 +93,13 @@ exactly the right length, and never read past `in_len`.
 
 Hashing lives in [security.cpp](../src/security.cpp):
 
-- `add_integrity_hash()` should remember to compute the SHA256 hash and include
-  it in the message! Encode a copy of the message with its `signature` field
-  set to all zeros, hash those bytes, then write the hash into
-  `msg->signature`. (Why zero the signature field before hashing?)
-- `verify_integrity_hash()` should compute the SHA256 hash the same way and
-  compare it to *the hash provided in the message*.
+- `hash_message()` computes the SHA256 hash of a message. Encode a copy of the
+  message with its `signature` field set to all zeros, then hash those bytes.
+  (Why zero the signature field before hashing?)
+- `add_integrity_hash()` should remember to include the hash in the message!
+  Call `hash_message()`, then write the hash into `msg->signature`.
+- `verify_integrity_hash()` should call `hash_message()` too and compare the
+  result to *the hash provided in the message*.
 
 The `signature` field has room for 64 bytes, enough for a real signature
 later. A SHA-256 hash only fills the first 32, so set the rest to zero, and
