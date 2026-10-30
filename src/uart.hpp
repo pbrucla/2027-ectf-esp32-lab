@@ -1,4 +1,5 @@
-#include "security.hpp"
+#pragma once
+
 #include <stdlib.h>
 #include <Arduino.h>
 
@@ -11,6 +12,6 @@
 
 void initialize_user_serial();
 void initialize_peer_serial();
-bool readLine(Stream& port, char* buffer, size_t capacity);
+bool readLine(Stream& port, char* buffer, size_t capacity, size_t* length);
 void handle_user_input();
 void handle_peer_input();

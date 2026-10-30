@@ -10,7 +10,7 @@
 //   Board A GPIO16 (RX) <--- Board B GPIO17 (TX)
 //   Board A GND         ---- Board B GND
 //
-// Messages on the wire look like "<sequence number>:<text>\n".
+// Messages on the wire look like "<text>\n".
 
 void setup() {
     initialize_user_serial();
