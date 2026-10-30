@@ -11,12 +11,10 @@ size_t receivedLength = 0;
 HardwareSerial& peer = Serial2;
 
 void initialize_user_serial() {
-    Serial.begin(USER_BAUD);
+    Serial.begin(115200);
 }
-
 void initialize_peer_serial() {
-    /// TODO 1: start the `peer` UART at LINK_BAUD with the SERIAL_8N1 format
-    /// on pins LINK_RX_PIN and LINK_TX_PIN.
+    peer.begin(LINK_BAUD, SERIAL_8N1, LINK_RX_PIN, LINK_TX_PIN);
 }
 
 // Collect characters from `port` into `buffer` until '\n'.
@@ -58,13 +56,21 @@ bool readLine(Stream& port, char* buffer, size_t capacity, size_t* length) {
 }
 
 void handle_user_input() {
-    /// TODO 2: use readLine() to read a line the user typed from `Serial` into
-    /// typedBuffer (with typedLength). If a non-empty line arrived, send it to
-    /// `peer` followed by '\n', then print "Sent: <line>" to `Serial`.
+    if (readLine(Serial, typedBuffer, sizeof(typedBuffer), &typedLength)
+        && typedBuffer[0] != '\0') {
+
+        peer.write((const uint8_t*)typedBuffer, strlen(typedBuffer));
+        peer.write('\n');
+
+        Serial.printf("Sent: %s\n", typedBuffer);
+    }
 }
 
 void handle_peer_input() {
-    /// TODO 3: use readLine() to read a line from `peer` into receivedBuffer
-    /// (with receivedLength). If a non-empty line arrived, print
-    /// "Received: <line>" to `Serial`.
+    // Read messages from the other board.
+    if (readLine(peer, receivedBuffer, sizeof(receivedBuffer), &receivedLength)
+        && receivedBuffer[0] != '\0') {
+
+        Serial.printf("Received: %s\n", receivedBuffer);
+    }
 }
