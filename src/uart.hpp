@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <Arduino.h>
 
+#define USER_BAUD    115200
 // ---------- Settings (must match on both boards) ----------
 #define LINK_BAUD    9600
 #define LINK_RX_PIN  16

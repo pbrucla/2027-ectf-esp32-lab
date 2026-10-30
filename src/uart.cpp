@@ -10,7 +10,7 @@ uint32_t expectedSeq = 1;
 HardwareSerial& peer = Serial2;
 
 void initialize_user_serial() {
-    Serial.begin(115200);
+    Serial.begin(USER_BAUD);
 }
 void initialize_peer_serial() {
     peer.begin(LINK_BAUD, SERIAL_8N1, LINK_RX_PIN, LINK_TX_PIN);
