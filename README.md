@@ -8,6 +8,6 @@ The setup instructions are [here](docs/phase_0_setup.md).
 
 | Week    | Savings |
 | -------- | ------- |
-| 10/22/2026  | Phase 1: [UART Communication](phase_1.md) |
-| 10/29/2026  | Phase 2: [Integrity](phase_2.md) |
+| 10/22/2026  | Phase 1: [UART Communication](docs/phase_1.md) |
+| 10/29/2026  | Phase 2: [Integrity](docs/phase_2.md) |
 | 11/5/2026   | Phase 3: More Security? |
