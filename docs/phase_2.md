@@ -1,21 +1,16 @@
 # Phase 2: Integrity Checks!
 
-In Phase 1, the receiver printed whatever arrived. If noise flipped a bit on
-the wire, it printed the wrong text and had no way to know. That's annoying
-for chat messages. It's dangerous for a **firmware update**, where one wrong
-byte can brick a device.
-
 Like seen before in the [Python Crypto lab](https://github.com/pbrucla/2027-ectf-crypto-lab), we want to implement hashes to verify integrity! For this week, we're only focused on hashes since I figured C/C++ development is a bit of a learning curve. If you're more familiar with C/C++, feel free to go ahead and implement signatures, and replay protection as we have done in the Python lab.
 
 ## The code
 
-Here we're focusing on `hash_message()`, `add_integrity_hash()` and `verify_integrity_hash()` in [security.cpp](../src/security.cpp). Implement these functions and also implement `encode()` and `decode()` in [commands.cpp](../src/commands.cpp).
+Here we're focusing on `add_integrity_hash()` and `verify_integrity_hash()` in [security.cpp](../src/security.cpp). Implement these functions and also implement `encode()` and `decode()` in [commands.cpp](../src/commands.cpp).
 
 | File | What it holds |
 | --- | --- |
 | [src/commands.hpp](../src/commands.hpp) | The `cmd_msg_t` command struct, its wire format, `encode()` and `decode()` |
 | [src/crypto.hpp](../src/crypto.hpp) | `sha256()` (given, in `crypto.cpp`) |
-| [src/security.hpp](../src/security.hpp) | `hash_message()`, `add_integrity_hash()` and `verify_integrity_hash()` |
+| [src/security.hpp](../src/security.hpp) | `add_integrity_hash()` and `verify_integrity_hash()` |
 | [test/test.cpp](../test/test.cpp) | Unit tests |
 
 Read the headers first. Each function you write has a `TODO`.
@@ -93,12 +88,8 @@ exactly the right length, and never read past `in_len`.
 
 Hashing lives in [security.cpp](../src/security.cpp):
 
-- `hash_message()` computes the SHA256 hash of a message. Encode a copy of the
-  message with its `signature` field set to all zeros, then hash those bytes.
-  (Why zero the signature field before hashing?)
-- `add_integrity_hash()` should remember to include the hash in the message!
-  Call `hash_message()`, then write the hash into `msg->signature`.
-- `verify_integrity_hash()` should call `hash_message()` too and compare the
+- `add_integrity_hash()` should hash the `cmd` and `payload` components of the message and write this hash into `msg->signature`.
+- `verify_integrity_hash()` should call `sha_256()` too and compare the
   result to *the hash provided in the message*.
 
 The `signature` field has room for 64 bytes, enough for a real signature
@@ -120,7 +111,3 @@ Besides `encode()` and `decode()` working together, the tests in
    `verify_integrity_hash()` reject it.
 3. A message that never had a hash added fails.
 4. A message whose unused signature bytes aren't zero fails.
-
-One rule the tests can't check, because they don't know your layout:
-`decode()` must reject bytes whose command type is unknown. Make sure yours
-does.

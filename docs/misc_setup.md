@@ -4,7 +4,8 @@
     - Open this repo as a PIO project once you have installed it.
     - Change to CRLF in “Serial Monitor”
 
-2. Install `make` to use terminal commands to build and run everything
+2. Installing C++ toolchain?
+3. Install `make` to use terminal commands to build and run everything
     - On MacOS, use https://formulae.brew.sh/formula/make
     - On Windows, use https://gnuwin32.sourceforge.net/packages/make.htm
 
