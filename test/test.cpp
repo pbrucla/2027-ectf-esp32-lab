@@ -86,7 +86,7 @@ TEST_CASE(decode_rejects_wrong_length) {
 TEST_CASE(integrity_round_trip) {
     cmd_msg_t msg = sample_update();
     TEST_ASSERT(add_integrity_hash(&msg) == 0);
-    TEST_ASSERT(verify_integrity_hash(&msg));
+    TEST_ASSERT(verify_integrity_hash(&msg) == 0);
 
     // The hash still checks out after a trip through the wire format.
     uint8_t buf[MAX_ENCODED_LEN];
@@ -94,7 +94,7 @@ TEST_CASE(integrity_round_trip) {
     TEST_ASSERT(length > 0);
     cmd_msg_t received;
     TEST_ASSERT(decode(&received, buf, (size_t)length) == length);
-    TEST_ASSERT(verify_integrity_hash(&received));
+    TEST_ASSERT(verify_integrity_hash(&received) == 0);
     TEST_PASS();
 }
 
@@ -115,7 +115,7 @@ TEST_CASE(integrity_detects_any_flipped_bit) {
             // Either decode() rejects it, or the hash check must.
             cmd_msg_t received;
             if (decode(&received, corrupted, (size_t)length) != -1) {
-                TEST_ASSERT(!verify_integrity_hash(&received));
+                TEST_ASSERT(verify_integrity_hash(&received) == -1);
             }
         }
     }
@@ -124,7 +124,7 @@ TEST_CASE(integrity_detects_any_flipped_bit) {
 
 TEST_CASE(integrity_rejects_missing_hash) {
     cmd_msg_t msg = sample_update();
-    TEST_ASSERT(!verify_integrity_hash(&msg));
+    TEST_ASSERT(verify_integrity_hash(&msg) == -1);
     TEST_PASS();
 }
 
@@ -132,7 +132,7 @@ TEST_CASE(integrity_rejects_nonzero_padding) {
     cmd_msg_t msg = sample_update();
     TEST_ASSERT(add_integrity_hash(&msg) == 0);
     msg.signature[NUM_BYTES_IN_SIGNATURE - 1] = 1;
-    TEST_ASSERT(!verify_integrity_hash(&msg));
+    TEST_ASSERT(verify_integrity_hash(&msg) == -1);
     TEST_PASS();
 }
 

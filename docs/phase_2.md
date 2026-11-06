@@ -88,26 +88,41 @@ exactly the right length, and never read past `in_len`.
 
 Hashing lives in [security.cpp](../src/security.cpp):
 
-- `add_integrity_hash()` should hash the `cmd` and `payload` components of the message and write this hash into `msg->signature`.
-- `verify_integrity_hash()` should call `sha_256()` too and compare the
-  result to *the hash provided in the message*.
+```cpp
+// Returns 0 on success, or -1 if `msg` is NULL or `msg->cmd` is unknown.
+int add_integrity_hash(cmd_msg_t* msg);
+// Returns 0 if the hash is valid, or -1 if it is not.
+int verify_integrity_hash(const cmd_msg_t* msg);
+```
+
+- `add_integrity_hash()` should hash the `cmd` and `payload` components of the message and write this hash into `msg->signature`. The hash input is the 1 byte of `cmd` followed by the 17 bytes of `payload` (18 bytes total); don't include the `signature` field.
+- `verify_integrity_hash()` should call `sha256()` on the same 18 bytes and compare the
+  result to *the hash provided in the message*. Compare the bytes with `memcmp()`, not `==`.
 
 The `signature` field has room for 64 bytes, enough for a real signature
 later. A SHA-256 hash only fills the first 32, so set the rest to zero, and
-have `verify_integrity_hash()` reject a message where they aren't.
+have `verify_integrity_hash()` return -1 for a message where they aren't.
+`verify_integrity_hash()` also returns -1 for a NULL message, an unknown
+command type, or a hash that doesn't match.
+
+Remember to `#include <string.h>` in any file that uses `memcpy()`, `memcmp()`
+or `memset()`.
 
 On the receiving side, call `decode()` and then `verify_integrity_hash()`.
-Only trust the message if both succeed.
+Only trust the message if both succeed, meaning `decode()` doesn't return -1
+and `verify_integrity_hash()` returns 0.
 
 ## What the tests check
 
 Besides `encode()` and `decode()` working together, the tests in
 [test/test.cpp](../test/test.cpp) check that:
 
-1. A message passes `verify_integrity_hash()` right after
+1. A message makes `verify_integrity_hash()` return 0 right after
    `add_integrity_hash()`, including after going through `encode()` and
    `decode()`.
 2. Flipping **any single bit** of the encoded message makes `decode()` or
-   `verify_integrity_hash()` reject it.
-3. A message that never had a hash added fails.
-4. A message whose unused signature bytes aren't zero fails.
+   `verify_integrity_hash()` return -1.
+3. A message that never had a hash added makes `verify_integrity_hash()` return -1.
+4. A message whose unused signature bytes aren't zero makes
+   `verify_integrity_hash()` return -1.
+5. `add_integrity_hash()` returns -1 for an unknown command type.

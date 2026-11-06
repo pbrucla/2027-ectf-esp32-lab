@@ -8,8 +8,8 @@ int add_integrity_hash(cmd_msg_t* msg) {
     return -1;
 }
 
-bool verify_integrity_hash(const cmd_msg_t* msg) {
-    /// TODO: recompute the hash with sha_256() and compare it with
+int verify_integrity_hash(const cmd_msg_t* msg) {
+    /// TODO: recompute the hash with sha256() and compare it with
     /// `msg->signature`. Also check that the unused bytes are zero.
-    return false;
+    return -1;
 }
