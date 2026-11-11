@@ -3,10 +3,10 @@
 PIO ?= $(shell command -v pio 2>/dev/null || echo $(HOME)/.platformio/penv/bin/pio)
 ENV := esp32dev
 
+CLANG_FORMAT ?= clang-format
 CLANG_TIDY ?= clang-tidy
 
-SOURCES := $(shell find src -type f \( -name '*.cpp' -o -name '*.c' \))
-
+SOURCES := $(shell find src -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.hpp' -o -name '*.h' \))
 TIDY_CHECKS := -*,bugprone-*,clang-analyzer-*,performance-*,readability-*,modernize-use-nullptr,modernize-use-override,modernize-use-using,cppcoreguidelines-init-variables,cppcoreguidelines-pro-type-member-init
 
 # Host unit tests: the Phase 2 code (no Arduino) built with your computer's
@@ -35,6 +35,9 @@ test:
 
 compiledb:
 	$(PIO) run -e $(ENV) -t compiledb
+
+format:
+	$(CLANG_FORMAT) -i $(SOURCES)
 
 tidy: compiledb
 	$(CLANG_TIDY) -p . \
