@@ -1,6 +1,7 @@
 // Given in Phase 3: the Phase 2 reference solution for encode() and decode().
-#include <string.h>
 #include "commands.hpp"
+
+#include <string.h>
 
 // The wire format for UPDATE (82 bytes). test/server.py builds the same bytes.
 //
@@ -8,7 +9,7 @@
 //   0       1     cmd (0 = UPDATE)
 //   1       17    payload (1 byte version + 16 bytes firmware)
 //   18      64    signature
-#define ENCODED_UPDATE_LEN  82
+#define ENCODED_UPDATE_LEN 82
 
 int encode(const cmd_msg_t* in_msg, uint8_t* out_buf, size_t out_cap) {
     if (in_msg == NULL || out_buf == NULL || in_msg->cmd != UPDATE) {

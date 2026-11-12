@@ -7,8 +7,8 @@
 #define SHA512_DIGEST_LEN 64
 
 #define ED25519_PRIVATE_KEY_LEN 32
-#define ED25519_PUBLIC_KEY_LEN  32
-#define ED25519_SIGNATURE_LEN   64
+#define ED25519_PUBLIC_KEY_LEN 32
+#define ED25519_SIGNATURE_LEN 64
 
 // Write the SHA-256 hash of the `len` bytes at `data` to `out`.
 // Spec: FIPS 180-4, https://doi.org/10.6028/NIST.FIPS.180-4

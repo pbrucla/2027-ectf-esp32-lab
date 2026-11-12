@@ -1,5 +1,7 @@
-#include <string.h>
 #include "uart.hpp"
+
+#include <string.h>
+
 #include "hex.hpp"
 #include "security.hpp"
 
@@ -7,7 +9,8 @@
 #if __has_include("public_key.hpp")
 #include "public_key.hpp"
 #else
-#error "src/public_key.hpp is missing. Run `make keys` first (see docs/phase_3.md)."
+#error \
+    "src/public_key.hpp is missing. Run `make keys` first (see docs/phase_3.md)."
 #endif
 
 // Fixed-size buffers. No dynamic allocation.
@@ -74,9 +77,8 @@ bool readLine(Stream& port, char* buffer, size_t capacity, size_t* length) {
 }
 
 void handle_user_input() {
-    if (readLine(Serial, typedBuffer, sizeof(typedBuffer), &typedLength)
-        && typedBuffer[0] != '\0') {
-
+    if (readLine(Serial, typedBuffer, sizeof(typedBuffer), &typedLength) &&
+        typedBuffer[0] != '\0') {
         peer.write((const uint8_t*)typedBuffer, strlen(typedBuffer));
         peer.write('\n');
 
@@ -124,21 +126,21 @@ static void handle_command(const char* hex) {
     }
 
     switch (msg.cmd) {
-    case UPDATE:
-        apply_update(&msg.payload.firmware_payload);
-        break;
-    default:
-        // decode() already rejects unknown commands, but stay safe.
-        reply("REJECTED: unknown command");
-        break;
+        case UPDATE:
+            apply_update(&msg.payload.firmware_payload);
+            break;
+        default:
+            // decode() already rejects unknown commands, but stay safe.
+            reply("REJECTED: unknown command");
+            break;
     }
 }
 
 void handle_peer_input() {
     // Read messages from the other board.
-    if (readLine(peer, receivedBuffer, sizeof(receivedBuffer), &receivedLength)
-        && receivedBuffer[0] != '\0') {
-
+    if (readLine(peer, receivedBuffer, sizeof(receivedBuffer),
+                 &receivedLength) &&
+        receivedBuffer[0] != '\0') {
         Serial.printf("Received: %s\n", receivedBuffer);
 
         if (strncmp(receivedBuffer, CMD_PREFIX, strlen(CMD_PREFIX)) == 0) {

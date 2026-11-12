@@ -21,12 +21,14 @@ int verify_integrity_hash(const cmd_msg_t* msg);
 // `msg->signature`.
 // Returns 0 on success, or -1 if `msg` or `private_key` is NULL or `msg->cmd`
 // is not a known command type.
-int add_signature(cmd_msg_t* msg, const uint8_t private_key[ED25519_PRIVATE_KEY_LEN]);
+int add_signature(cmd_msg_t* msg,
+                  const uint8_t private_key[ED25519_PRIVATE_KEY_LEN]);
 
 // Returns 0 if `msg->signature` is a valid signature of `cmd` and `payload`
 // by the owner of `public_key` (checked with ed25519_verify()), or -1 if not
 // (including a NULL `msg` or `public_key`, or an unknown cmd).
-int verify_signature(const cmd_msg_t* msg, const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]);
+int verify_signature(const cmd_msg_t* msg,
+                     const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]);
 
 // Later phases:
 // bool verify_firmware_counter(const cmd_msg_t* msg);

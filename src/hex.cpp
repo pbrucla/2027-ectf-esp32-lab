@@ -1,5 +1,6 @@
-#include <string.h>
 #include "hex.hpp"
+
+#include <string.h>
 
 static int hex_value(char c) {
     if (c >= '0' && c <= '9') {
