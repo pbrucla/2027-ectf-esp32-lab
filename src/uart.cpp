@@ -72,5 +72,8 @@ void handle_peer_input() {
         && receivedBuffer[0] != '\0') {
 
         Serial.printf("Received: %s\n", receivedBuffer);
+
+        /// TO IMPLEMENT: attempt to interpret as a cmd
+        // interpret receivedBuffer as a command_t and interpret opcode/command type, switch on that to do some command
     }
 }

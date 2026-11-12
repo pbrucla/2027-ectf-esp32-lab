@@ -36,13 +36,11 @@ struct cmd_msg_t {
 // MAX_ENCODED_LEN bytes.
 #define MAX_ENCODED_LEN     256
 
-/// TODO: implement this
 // Serializes a cmd_msg_t into a U8 array in your wire format.
 // Returns how many bytes were encoded, or -1 if the command type is unknown or
 // `out_cap` (the size of out_buf) is too small.
 int encode(const cmd_msg_t* in_msg, uint8_t* out_buf, size_t out_cap);
 
-/// TODO: implement this
 // Deserializes the `in_len` bytes at in_buf into a cmd_msg_t.
 // Returns how many bytes were decoded, or -1 if the command type is unknown or
 // `in_len` is not the exact length encode() produces for that command.
