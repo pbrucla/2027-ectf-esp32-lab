@@ -7,7 +7,7 @@
 - 3 × female-to-female jumper wires (or a breadboard and male-to-male wires)
 - A computer with [PlatformIO](https://platformio.org/): either the
   **PlatformIO IDE** extension for [VS Code](https://code.visualstudio.com/),
-  or the command-line tool (`pip install platformio` or
+  or the command-line tool (`uv tool install platformio` or
   `brew install platformio`)
 
 ## Background: how UART works

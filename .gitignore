@@ -10,3 +10,5 @@ build/
 .vscode/ipch
 .cache
 compile_commands.json
+keys/
+src/public_key.hpp

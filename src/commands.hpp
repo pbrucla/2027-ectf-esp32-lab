@@ -3,8 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Room for an Ed25519 signature (64 bytes) in a later phase.
-// A SHA-256 hash only fills the first 32 bytes; the rest must be zero.
+// Room for an Ed25519 signature (64 bytes, Phase 3).
+// In Phase 2, a SHA-256 hash only fills the first 32 bytes; the rest must be zero.
 #define NUM_BYTES_IN_SIGNATURE  64
 #define MAX_FIRMWARE_SIZE       16
 
@@ -31,12 +31,12 @@ struct cmd_msg_t {
     uint8_t signature[NUM_BYTES_IN_SIGNATURE];
 };
 
-// You choose the byte layout (the wire format). decode() just has to
-// understand what encode() writes, and an encoded command must fit in
-// MAX_ENCODED_LEN bytes.
+// encode() and decode() are given in commands.cpp. The byte layout (the wire
+// format) is described there, and test/server.py builds the same bytes. An
+// encoded command fits in MAX_ENCODED_LEN bytes.
 #define MAX_ENCODED_LEN     256
 
-// Serializes a cmd_msg_t into a U8 array in your wire format.
+// Serializes a cmd_msg_t into a U8 array in the wire format.
 // Returns how many bytes were encoded, or -1 if the command type is unknown or
 // `out_cap` (the size of out_buf) is too small.
 int encode(const cmd_msg_t* in_msg, uint8_t* out_buf, size_t out_cap);

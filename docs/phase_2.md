@@ -42,8 +42,10 @@ Then, from the repository folder:
 make test
 ```
 
-Each failing check prints a `FAIL` line with the test name and the line
-number, and the last line says how many tests passed. Right now some of them
+Each test prints a green `PASS` line, or a red `FAIL` line with the test
+name, the check that failed and its line number. The last line says how many
+tests passed. (Colors show up in a terminal; set `NO_COLOR=1` to turn them
+off.) Right now some of them
 fail. By the end of this phase, all of them should pass.
 
 ## Part 1: SHA-256
