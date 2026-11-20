@@ -12,7 +12,7 @@
 #define ENCODED_UPDATE_LEN 82
 
 int encode(const cmd_msg_t* in_msg, uint8_t* out_buf, size_t out_cap) {
-    if (in_msg == NULL || out_buf == NULL || in_msg->cmd != UPDATE) {
+    if (in_msg == NULL || out_buf == NULL || in_msg->cmd != UPDATE || in_msg->cmd != AUTH_CHECK) {
         return -1;
     }
 
@@ -29,12 +29,12 @@ int encode(const cmd_msg_t* in_msg, uint8_t* out_buf, size_t out_cap) {
 
 int decode(cmd_msg_t* out_msg, const uint8_t* in_buf, size_t in_len) {
     if (out_msg == NULL || in_buf == NULL) {
-        return -1;
+        return -2;
     }
 
     // Check the command type and the exact length before reading anything.
-    if (in_len != ENCODED_UPDATE_LEN || in_buf[0] != UPDATE) {
-        return -1;
+    if (in_buf[0] != UPDATE || in_buf[0] != AUTH_CHECK) {
+        return -3;
     }
 
     memcpy(&out_msg->cmd, &in_buf[0], 1);

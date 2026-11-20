@@ -5,6 +5,9 @@
 #include "commands.hpp"
 #include "hex.hpp"
 #include "security.hpp"
+#include <stdio.h>
+
+#define USER_AS_PEER
 
 // The public key the boards trust, made by `make keys` (test/keygen.py).
 #if __has_include("public_key.hpp")
@@ -77,22 +80,18 @@ bool readLine(Stream& port, char* buffer, size_t capacity, size_t* length) {
     return false;
 }
 
-void handle_user_input() {
-    if (readLine(Serial, typedBuffer, sizeof(typedBuffer), &typedLength) &&
-        typedBuffer[0] != '\0') {
-        peer.write((const uint8_t*)typedBuffer, strlen(typedBuffer));
-        peer.write('\n');
-
-        Serial.printf("Sent: %s\n", typedBuffer);
-    }
-}
-
 // Print `text` locally and send it back to whoever sent the command, so the
 // sender (another board, or test/server.py) learns what happened.
 static void reply(const char* text) {
+#ifndef USER_AS_PEER
     Serial.println(text);
     peer.write((const uint8_t*)text, strlen(text));
     peer.write('\n');
+#else
+    Serial.println(text);
+// Serial.write((const uint8_t*)text, strlen(text));
+// Serial.write('\n');
+#endif
 }
 
 static void apply_update(const firmware_payload_t* update) {
@@ -124,8 +123,11 @@ static void handle_command(const char* hex) {
     }
 
     cmd_msg_t msg = {};
-    if (decode(&msg, bytes, (size_t)length) < 0) {
-        reply("REJECTED: not a valid command");
+    int i = decode(&msg, bytes, (size_t)length);
+    if (i < 0) {
+        char res[64] = {};
+        int len = snprintf(res, 64, "REJECTED: not a valid command %d\n", i);
+        reply(res);
         return;
     }
 
@@ -148,7 +150,29 @@ static void handle_command(const char* hex) {
     }
 }
 
+void handle_user_input() {
+#ifndef USER_AS_PEER
+    if (readLine(Serial, typedBuffer, sizeof(typedBuffer), &typedLength) &&
+        typedBuffer[0] != '\0') {
+        peer.write((const uint8_t*)typedBuffer, strlen(typedBuffer));
+        peer.write('\n');
+
+        // Serial.printf("Sent: %s\n", typedBuffer);
+    }
+#else
+    // Read messages from the other board.
+    if (readLine(Serial, receivedBuffer, sizeof(receivedBuffer),
+                 &receivedLength) &&
+        receivedBuffer[0] != '\0') {
+        if (strncmp(receivedBuffer, CMD_PREFIX, strlen(CMD_PREFIX)) == 0) {
+            handle_command(receivedBuffer + strlen(CMD_PREFIX));
+        }
+    }
+#endif
+}
+
 void handle_peer_input() {
+#ifndef USER_AS_PEER
     // Read messages from the other board.
     if (readLine(peer, receivedBuffer, sizeof(receivedBuffer),
                  &receivedLength) &&
@@ -159,4 +183,5 @@ void handle_peer_input() {
             handle_command(receivedBuffer + strlen(CMD_PREFIX));
         }
     }
+#endif
 }
