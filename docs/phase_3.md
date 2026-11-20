@@ -219,7 +219,7 @@ uv run test/server.py --port <port A> --version 1 --firmware "old buggy code"
 Both are accepted. Each one really was signed by the server, so the signature
 checks out. But an attacker who recorded the old update off the wire can
 **replay** it later to roll the board back to buggy firmware. Signatures prove
-who made a message, not when. Fixing that is the next phase.
+who made a message, not when.
 
 ## Troubleshooting
 

@@ -30,6 +30,7 @@ Examples:
 
 Close any `pio device monitor` on the port first; only one program can use it.
 """
+
 import argparse
 import hashlib
 import sys
@@ -74,7 +75,9 @@ def find_port() -> str:
         print("No ESP32 serial port found. Ports on this computer:", file=sys.stderr)
         listed = ports
     else:
-        print("More than one board is plugged in. Pick one with --port:", file=sys.stderr)
+        print(
+            "More than one board is plugged in. Pick one with --port:", file=sys.stderr
+        )
         listed = matches
     for p in listed:
         print(f"  {p.device}  {p.description}", file=sys.stderr)
@@ -91,7 +94,9 @@ def payload_bytes(version: int, firmware: str) -> bytes:
     return bytes([version]) + data.ljust(MAX_FIRMWARE_SIZE, b"\0")
 
 
-def build_update(key: Ed25519PrivateKey, version: int, firmware: str, attack: str) -> bytes:
+def build_update(
+    key: Ed25519PrivateKey, version: int, firmware: str, attack: str
+) -> bytes:
     """The encoded UPDATE: cmd (1) | version (1) | firmware (16) | signature (64)."""
     signed = bytes([CMD_UPDATE]) + payload_bytes(version, firmware)
 
@@ -117,16 +122,34 @@ def main() -> int:
         description=__doc__.split("\n")[0],
         epilog="See docs/phase_3.md.",
     )
-    parser.add_argument("--port", help="serial port (found automatically if only one board is plugged in)")
-    parser.add_argument("--baud", type=int, default=115200,
-                        help="115200 through a board's USB port (default), 9600 for a UART adapter")
-    parser.add_argument("--version", type=int, default=1, help="firmware version, 0-255 (default 1)")
-    parser.add_argument("--firmware", default="hello, firmware!", help="up to 16 ASCII characters")
-    parser.add_argument("--attack", default="none",
-                        choices=["none", "tamper", "wrong-key", "unsigned", "hash"],
-                        help="send a bad command to check the board rejects it")
-    parser.add_argument("--listen", type=float, default=3.0,
-                        help="seconds to print what comes back (default 3)")
+    parser.add_argument(
+        "--port",
+        help="serial port (found automatically if only one board is plugged in)",
+    )
+    parser.add_argument(
+        "--baud",
+        type=int,
+        default=115200,
+        help="115200 through a board's USB port (default), 9600 for a UART adapter",
+    )
+    parser.add_argument(
+        "--version", type=int, default=1, help="firmware version, 0-255 (default 1)"
+    )
+    parser.add_argument(
+        "--firmware", default="hello, firmware!", help="up to 16 ASCII characters"
+    )
+    parser.add_argument(
+        "--attack",
+        default="none",
+        choices=["none", "tamper", "wrong-key", "unsigned", "hash"],
+        help="send a bad command to check the board rejects it",
+    )
+    parser.add_argument(
+        "--listen",
+        type=float,
+        default=3.0,
+        help="seconds to print what comes back (default 3)",
+    )
     args = parser.parse_args()
 
     if not 0 <= args.version <= 255:
@@ -152,7 +175,9 @@ def main() -> int:
         time.sleep(0.2)
         link.reset_input_buffer()
 
-        print(f"Sending to {port} ({args.attack if args.attack != 'none' else 'valid signature'}):")
+        print(
+            f"Sending to {port} ({args.attack if args.attack != 'none' else 'valid signature'}):"
+        )
         print(f"  {line.strip()}")
         link.write(line.encode("ascii"))
         link.flush()

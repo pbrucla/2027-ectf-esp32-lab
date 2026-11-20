@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "commands.hpp"
 #include "hex.hpp"
 #include "security.hpp"
 
@@ -104,6 +105,14 @@ static void apply_update(const firmware_payload_t* update) {
     reply(line);
 }
 
+static void auth_check(const auth_check_payload_t* payload) {
+    if (memcmp(PASSCODE, payload->passcode, PASSCODE_SIZE) == 0) {
+        reply("SUCCESS.");
+    } else {
+        reply("REJECTED.");
+    }
+}
+
 // Run a command line's hex text (the part after CMD_PREFIX). Nothing in it is
 // trusted until decode() and verify_signature() both succeed.
 static void handle_command(const char* hex) {
@@ -128,6 +137,9 @@ static void handle_command(const char* hex) {
     switch (msg.cmd) {
         case UPDATE:
             apply_update(&msg.payload.firmware_payload);
+            break;
+        case AUTH_CHECK:
+            auth_check(&msg.payload.auth_payload);
             break;
         default:
             // decode() already rejects unknown commands, but stay safe.

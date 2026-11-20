@@ -18,6 +18,7 @@ drift apart, `make test` fails instead of the board printing REJECTED.
 
 Run this again only if you change server.py's message format.
 """
+
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -33,7 +34,11 @@ OUT = Path(__file__).resolve().parent / "interop_vectors.hpp"
 
 # (C name, --attack mode, comment)
 VECTORS = [
-    ("SERVER_VALID_UPDATE", "none", "A correctly signed update. The board must accept it."),
+    (
+        "SERVER_VALID_UPDATE",
+        "none",
+        "A correctly signed update. The board must accept it.",
+    ),
 ]
 
 
@@ -55,7 +60,7 @@ def main() -> None:
         out.append(f"static const char {name}[] =")
         # Split the long hex string over several lines of C.
         for i in range(0, len(line), 64):
-            out.append(f'    "{line[i:i + 64]}"')
+            out.append(f'    "{line[i : i + 64]}"')
         out[-1] += ";"
         out.append("")
 

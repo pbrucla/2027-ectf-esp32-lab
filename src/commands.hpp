@@ -8,11 +8,13 @@
 // zero.
 #define NUM_BYTES_IN_SIGNATURE 64
 #define MAX_FIRMWARE_SIZE 16
+#define PASSCODE_SIZE 16
 
 // A fixed uint8_t base type, so any byte (even an unknown command) is a valid
 // cmd_type_t value that encode() and decode() can check and reject.
 enum cmd_type_t : uint8_t {
     UPDATE = 0,
+    AUTH_CHECK = 1,
 };
 
 struct firmware_payload_t {
@@ -20,8 +22,13 @@ struct firmware_payload_t {
     char firmware[MAX_FIRMWARE_SIZE];
 };
 
+struct auth_check_payload_t {
+    char passcode[PASSCODE_SIZE];
+};
+
 union cmd_payload_t {
     firmware_payload_t firmware_payload;
+    auth_check_payload_t auth_payload;
 };
 
 // A command in memory. Use encode() and decode() to convert it to and from

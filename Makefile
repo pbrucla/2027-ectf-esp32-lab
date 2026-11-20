@@ -13,8 +13,10 @@ UV ?= $(shell command -v uv 2>/dev/null \
 
 CLANG_FORMAT ?= clang-format
 CLANG_TIDY ?= clang-tidy
+RUFF ?= uvx ruff
 
 SOURCES := $(shell find src -type f \( -name '*.cpp' -o -name '*.c' -o -name '*.hpp' -o -name '*.h' \))
+PYTHON_SOURCES := $(shell find test -type f -name '*.py')
 TIDY_CHECKS := -*,bugprone-*,clang-analyzer-*,performance-*,readability-*,modernize-use-nullptr,modernize-use-override,modernize-use-using,cppcoreguidelines-init-variables,cppcoreguidelines-pro-type-member-init
 
 # Host unit tests: the Phase 2 and 3 code (no Arduino) built with your
@@ -47,13 +49,17 @@ test:
 # public key to src/public_key.hpp for the board. uv installs the Python
 # packages keygen.py needs on its own.
 keys:
-	"$(UV)" run test/keygen.py
+	"$(UV)" run test/keygen.py --passcode ILOVEECTFSOMUCH
 
 compiledb:
 	$(PIO) run -e $(ENV) -t compiledb
 
 format:
 	$(CLANG_FORMAT) -i $(SOURCES)
+	$(RUFF) format $(PYTHON_SOURCES)
+
+lint:
+	$(RUFF) check $(PYTHON_SOURCES)
 
 tidy: compiledb
 	$(CLANG_TIDY) -p . \

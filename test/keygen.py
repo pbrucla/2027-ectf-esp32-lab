@@ -19,6 +19,7 @@ Writes:
 If you make a new key, rebuild and re-upload the firmware to every board, or
 they will keep trusting the old public key and reject your commands.
 """
+
 import argparse
 import os
 import sys
@@ -65,7 +66,7 @@ def write_private_key(key: Ed25519PrivateKey, path: Path = PRIVATE_KEY_PATH) -> 
         f.write(private_bytes(key).hex() + "\n")
 
 
-def header_text(public_key: bytes) -> str:
+def header_text(public_key: bytes, passcode: str) -> str:
     rows = []
     for i in range(0, len(public_key), 8):
         rows.append("    " + " ".join(f"0x{b:02x}," for b in public_key[i : i + 8]))
@@ -82,6 +83,9 @@ def header_text(public_key: bytes) -> str:
         "static const uint8_t PUBLIC_KEY[ED25519_PUBLIC_KEY_LEN] = {\n"
         f"{body}\n"
         "};\n"
+        'static const char PASSCODE[16] = "'
+        f"{passcode}"
+        '";\n'
     )
 
 
@@ -89,6 +93,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument(
         "--force", action="store_true", help="replace an existing private key"
+    )
+    parser.add_argument(
+        "--passcode", type=str, help="passcode for auth_check command", required=True
     )
     args = parser.parse_args()
 
@@ -102,7 +109,7 @@ def main() -> int:
         print(f"Wrote a new private key to {PRIVATE_KEY_PATH.relative_to(REPO)}")
         print("Rebuild and re-upload the firmware to every board.")
 
-    PUBLIC_HEADER_PATH.write_text(header_text(public_bytes(key)))
+    PUBLIC_HEADER_PATH.write_text(header_text(public_bytes(key), args.passcode))
     print(f"Wrote the public key to {PUBLIC_HEADER_PATH.relative_to(REPO)}")
     return 0
 
